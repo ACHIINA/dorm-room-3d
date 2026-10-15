@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>部屋の暮らし 設計マップ</title>
+<style>
+  :root {
+    --bg: #f6f2ea; --panel: #fffdf8; --ink: #2b2620; --sub: #6d655b; --line: #ddd3c4;
+    --accent: #b5652b; --ok: #3f6b45; --wip: #9a6a12; --todo: #6d655b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #1d1a17; --panel: #262220; --ink: #eee6da; --sub: #b3a796; --line: #3c3530; --accent: #e09a5c; --ok: #8cc095; --wip: #e3b45c; --todo: #b3a796; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.7 "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .meta { color: var(--sub); font-size: 13px; margin-bottom: 18px; }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; font: inherit; color: var(--sub); cursor: pointer; }
+  nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  section { display: none; }
+  section.on { display: block; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; overflow-x: auto; }
+  h2 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+  .st { font-weight: 600; white-space: nowrap; }
+  .ok { color: var(--ok); } .wip { color: var(--wip); } .todo { color: var(--todo); }
+  code { font-size: 13px; }
+  .mermaid { min-width: 560px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>部屋の暮らし 設計マップ</h1>
+  <div class="meta">対象: 大学寮の部屋 / Godot 版(godot_walk) ・ 最終更新 2026-10-15 ・ 区分: 現状(集中モード + 暮らしの機能 + 昼夜・ドア・廊下 + 315 号室・ラウンジ・シャワールーム + 見た目の仕上げ)</div>
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-t="all">全体像</button>
+    <button role="tab" aria-selected="false" data-t="flow">使う流れ</button>
+    <button role="tab" aria-selected="false" data-t="screen">表示</button>
+    <button role="tab" aria-selected="false" data-t="data">保存する情報</button>
+    <button role="tab" aria-selected="false" data-t="progress">進み具合</button>
+  </nav>
+
+  <section id="all" class="on">
+    <div class="card">
+      <h2>何のための機能か</h2>
+      <p>自分用。部屋のゲームを起動して <code>F</code> を押すと机に座り、ポモドーロタイマーが始まる。残り時間は部屋のモニターと画面の隅に出て、時間になるとチャイムと macOS の通知で知らせる。今日の集中時間を記録する。</p>
+    </div>
+    <div class="card"><pre class="mermaid">
+flowchart LR
+  U["自分"] -->|F キー| FM["集中モード<br/>focus_mode.gd"]
+  FM -->|座らせる| P["プレイヤー<br/>player.gd"]
+  FM -->|残り時間を描く| MON["部屋のモニター"]
+  FM -->|残り時間を描く| HUD["画面の隅の表示"]
+  FM -->|ランプ・レコード| R["部屋の操作<br/>room_setup.gd"]
+  FM -->|時間になったら| N["チャイム＋macOS 通知"]
+  FM -->|終わった集中を追記| LOG[("集中の記録<br/>focus_log.json")]
+  FM -->|長さを覚える| SET[("設定<br/>focus_settings.json")]
+  FM -->|M キー| MINI["小窓モード<br/>右下・常に手前"]
+</pre></div>
+    <div class="card">
+      <h2>暮らしの機能(life.gd)</h2>
+      <p>部屋の物を見て <code>E</code> で使う。毎日 7 つの「今日のこと」があり、全部終えた日が続くと連続日数が伸びる。</p>
+      <pre class="mermaid">
+flowchart LR
+  P["自分(E / Tab / Z / P / Q)"] --> LIFE["暮らし<br/>life.gd"]
+  LIFE --- K["ケトル → マグのコーヒー(湯気・3 口)"]
+  LIFE --- F["金魚鉢(泳ぐ・えさ)"]
+  LIFE --- W["じょうろ → 植物 8 鉢に水やり"]
+  LIFE --- C["天井のペンダントとスイッチ"]
+  LIFE --- R["窓の外の雨(雨音)"]
+  LIFE --- CAL["壁のカレンダー(集中した日にスタンプ)"]
+  LIFE --- S["ベッドで眠る(今日のまとめ)"]
+  LIFE --- PH["写真(ピクチャ/DormRoom)"]
+  LIFE -->|達成を記録| ST[("今日のこと<br/>life_state.json")]
+  FL[("集中の記録<br/>focus_log.json")] -->|集中 2 回・カレンダー| LIFE
+</pre>
+    </div>
+    <div class="card">
+      <h2>昼と夜・ドア・廊下(world.gd)</h2>
+      <p>起動時の実際の時刻で昼(6:00〜17:59)か夜かが決まる。<code>T</code> か目覚まし時計で切り替え。窓から入る光(太陽・月・窓の明るさ・空)は、昼夜・カーテン・雨の組み合わせから 1 か所でまとめて計算する。</p>
+      <pre class="mermaid">
+flowchart LR
+  T["T キー / 目覚まし時計"] --> W["昼と夜<br/>world.gd"]
+  CU["カーテン(room_setup.gd)"] -->|変わったら| W
+  RA["雨(life.gd)"] -->|変わったら| W
+  W -->|昼| D["空: ケンブリッジの中庭<br/>太陽(控えめ)・窓の拡散光"]
+  W -->|夜| N["空: 丘の上の教会の夜景<br/>月光・窓の青い光"]
+  DR["ドア(Door_Leaf)"] -->|E| W
+  W --> H["廊下の蛍光灯 6 か所と EXIT の明かり"]
+  ROOM["313 号室"] ---|ドア| HALL["廊下 14m<br/>掲示板、給水機、消火器、ゴミ箱、非常口、窓"]
+</pre>
+    </div>
+    <div class="card">
+      <h2>寮の間取り(dorm.gd)</h2>
+      <p>廊下から入れるのは 313 号室(自室)、315 号室(隣)、共用ラウンジ、シャワールーム。311・312・314・317 号室はノックだけできる。</p>
+      <pre class="mermaid">
+flowchart TB
+  HALL["廊下"] ---|ドア E| R313["313 号室(自室)"]
+  HALL ---|ドア E| R315["315 号室<br/>二人部屋・ガーランドライト"]
+  HALL ---|広い入口| LOUNGE["共用ラウンジ<br/>ソファ・テレビ・キッチン・電子レンジ・ダイニング"]
+  HALL ---|ドア E| SHOWER["シャワールーム<br/>洗面台 2・鏡・シャワー 3"]
+  HALL -.->|ノック E| OTHERS["311・312・314・317 号室<br/>(ランダムな返事)"]
+</pre>
+    </div>
+  </section>
+
+  <section id="flow">
+    <div class="card">
+      <h2>状態の移り変わり</h2>
+      <p>集中 → 休憩 を繰り返し、4 回目の集中のあとは長い休憩。<code>Space</code> で一時停止、<code>F</code> でいつでも終了。</p>
+      <pre class="mermaid">
+stateDiagram-v2
+  [*] --> 通常: 起動
+  通常 --> 集中: F(机に座る・ランプ点灯・レコード再生)
+  集中 --> 休憩: 残り 0(チャイム・通知・記録に追記)
+  休憩 --> 集中: 残り 0(チャイム・通知)
+  集中 --> 長い休憩: 4 回目の集中が終わる
+  長い休憩 --> 集中: 残り 0
+  集中 --> 一時停止: Space
+  休憩 --> 一時停止: Space
+  一時停止 --> 集中: Space(集中中だった場合)
+  一時停止 --> 休憩: Space(休憩中だった場合)
+  集中 --> 通常: F(途中までの集中も 1 分以上なら記録)
+  休憩 --> 通常: F
+</pre>
+    </div>
+    <div class="card">
+      <h2>キー操作</h2>
+      <table>
+        <tr><th>キー</th><th>通常</th><th>集中モード中</th></tr>
+        <tr><td><code>F</code></td><td>集中モードを始める</td><td>集中モードを終える</td></tr>
+        <tr><td><code>Space</code></td><td>ジャンプ</td><td>一時停止 / 再開</td></tr>
+        <tr><td><code>↑</code> <code>↓</code></td><td>—</td><td>集中の長さを 5 分ずつ変える(次の集中から)</td></tr>
+        <tr><td><code>M</code></td><td colspan="2">小窓モードの切り替え(右下に小さく、常に手前)</td></tr>
+        <tr><td><code>E</code> <code>R</code></td><td colspan="2">部屋の物を使う(ランプ・モニター・レコード・カーテン・ケトル・マグ・金魚・じょうろ・植物・天井の照明・窓の雨・カレンダーとノート)、次の曲</td></tr>
+        <tr><td><code>Tab</code></td><td colspan="2">今日のこと(ノート)を開く・閉じる</td></tr>
+        <tr><td><code>Z</code></td><td colspan="2">ベッドで横になっているときに眠る(暗転して今日のまとめ)</td></tr>
+        <tr><td><code>Q</code></td><td colspan="2">持っているじょうろを元の場所に置く</td></tr>
+        <tr><td><code>P</code></td><td colspan="2">表示を隠して写真を保存(ピクチャ/DormRoom)</td></tr>
+        <tr><td><code>T</code></td><td colspan="2">昼と夜の切り替え(目覚まし時計を見て E でも可)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="screen">
+    <div class="card">
+      <h2>今日のこと(毎日リセット)</h2>
+      <table>
+        <tr><th>項目</th><th>達成のしかた</th></tr>
+        <tr><td>集中を2回する</td><td>集中モードで 25 分(設定した長さ)を 2 回最後まで</td></tr>
+        <tr><td>植物に水をやる</td><td>じょうろを持って(棚の横の床)植物を見て E</td></tr>
+        <tr><td>金魚にえさをやる</td><td>窓台の金魚鉢を見て E</td></tr>
+        <tr><td>コーヒーを1杯飲みきる</td><td>ケトル(手前の棚)で淹れて、机のマグを 3 回飲む</td></tr>
+        <tr><td>レコードを1曲最後まで聴く</td><td>ターンテーブルで再生し、曲が終わるまで</td></tr>
+        <tr><td>シャワーを浴びる</td><td>シャワールームのブースでシャワーを見て E(カーテンが閉まり、お湯と湯気と音)</td></tr>
+        <tr><td>明かりを全部消してから眠る</td><td>デスクランプ・球形ランプ・モニター・天井の照明を消し、ベッドで横になって Z</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>表示の切り替わり</h2>
+      <pre class="mermaid">
+flowchart TB
+  A["通常の画面<br/>上: 操作の説明"] -->|F| B["集中モードの画面<br/>部屋のモニター: 大きな残り時間<br/>右上: モニターが視界の外のときだけ表示"]
+  B -->|M| C["小窓<br/>画面幅の 30% の大きさで右下へ・常に手前<br/>マウスは解放"]
+  C -->|M| B
+  B -->|F| A
+</pre>
+    </div>
+    <div class="card">
+      <h2>表示する文言</h2>
+      <table>
+        <tr><th>場所</th><th>内容</th></tr>
+        <tr><td>状態</td><td>「集中 1/4」「休憩」「長い休憩」「一時停止中」</td></tr>
+        <tr><td>残り時間</td><td>「24:59」(分:秒)</td></tr>
+        <tr><td>今日の合計</td><td>「今日の集中 1時間15分(3回)」</td></tr>
+        <tr><td>通知</td><td>集中の終わり「集中 25 分が終わりました。休憩 5 分」/ 休憩の終わり「休憩が終わりました。集中 25 分を始めます」</td></tr>
+        <tr><td>操作の説明</td><td>「F: 終える / Space: 一時停止 / ↑↓: 集中の長さ / M: 小窓」</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="card">
+      <h2>保存する情報</h2>
+      <p>Godot の利用者データ用フォルダ(<code>user://</code>)に JSON で保存する。macOS では <code>~/Library/Application Support/Godot/app_userdata/Dorm Room Walk/</code>。</p>
+      <pre class="mermaid">
+erDiagram
+  DAY ||--o{ SESSION : "1 日に複数の集中"
+  DAY { string date "2026-10-15" int minutes "その日の合計(分)" int count "完了した集中の回数" }
+  SESSION { string start "開始時刻" int minutes "集中した分" bool completed "最後までやったか" }
+  SETTINGS { int focus_min "集中の長さ(既定 25)" int break_min "休憩(既定 5)" int long_break_min "長い休憩(既定 15)" bool autoplay "集中開始でレコードを再生" }
+</pre>
+      <table>
+        <tr><th>ファイル</th><th>中身</th></tr>
+        <tr><td><code>focus_log.json</code></td><td>日付ごとの合計分・回数と、各集中の開始時刻・分・完了したか</td></tr>
+        <tr><td><code>focus_settings.json</code></td><td>集中・休憩の長さ、レコードを自動で再生するか</td></tr>
+        <tr><td><code>life_state.json</code></td><td>日付ごとの「今日のこと」の達成、コーヒーの杯数、聴いた曲数、水やりした鉢、金魚のえさ。連続日数と最後に全部終えた日</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="progress">
+    <div class="card">
+      <h2>進み具合</h2>
+      <table>
+        <tr><th>項目</th><th>状態</th><th>場所</th></tr>
+        <tr><td>集中・休憩のタイマーと状態の切り替え</td><td class="st ok">動作確認済み</td><td><code>scripts/godot_src/focus_mode.gd</code></td></tr>
+        <tr><td>机に座る・ランプとレコードの連動</td><td class="st ok">動作確認済み</td><td><code>focus_mode.gd</code> / <code>player.gd</code></td></tr>
+        <tr><td>部屋のモニターに残り時間を表示</td><td class="st ok">動作確認済み</td><td><code>focus_mode.gd</code>(集中中はモニターの E 操作を無効)</td></tr>
+        <tr><td>画面の右上の表示</td><td class="st ok">動作確認済み</td><td><code>focus_mode.gd</code>(モニターが見えているときは隠す)</td></tr>
+        <tr><td>チャイムと macOS 通知</td><td class="st wip">実装済み・音と通知の見え方は未確認</td><td><code>assets/sounds/chime.wav</code> / osascript</td></tr>
+        <tr><td>記録と設定の保存</td><td class="st ok">動作確認済み</td><td><code>user://focus_log.json</code> / <code>user://focus_settings.json</code></td></tr>
+        <tr><td>暮らしの機能(コーヒー・金魚・水やり・天井の照明・雨・カレンダー・眠る・写真・今日のこと)</td><td class="st ok">動作確認済み</td><td><code>scripts/godot_src/life.gd</code> / 新しい物は <code>scripts/r5_life_objects.py</code></td></tr>
+        <tr><td>昼と夜・ドアの開け閉め・廊下(歩いて出入り)</td><td class="st ok">動作確認済み</td><td><code>scripts/godot_src/world.gd</code> / 廊下は <code>scripts/r6_hallway.py</code></td></tr>
+        <tr><td>315 号室・ラウンジ・シャワールーム(ドア、ノック、テレビ、ソファ、電子レンジ、シャワー)</td><td class="st ok">動作確認済み</td><td><code>scripts/godot_src/dorm.gd</code> / 空間は <code>scripts/r7_spaces.py</code></td></tr>
+        <tr><td>見た目の仕上げ(部屋ごとの VoxelGI、柔らかい影、自動露出・色調整・粒子・周辺減光、汚れとデカール、歩くときの揺れと足音)</td><td class="st ok">動作確認済み(約 60fps)</td><td><code>scripts/godot_src/visuals.gd</code></td></tr>
+        <tr><td>実物スキャンの家具(学校椅子 6 脚・格子棚・テレビ台・クッション・サイドテーブル)</td><td class="st ok">動作確認済み</td><td><code>scripts/r8_furniture.py</code></td></tr>
+        <tr><td>雨音とチャイムの聴こえ方</td><td class="st wip">未確認(音は聴けないため)</td><td><code>assets/sounds/</code></td></tr>
+        <tr><td>小窓モード</td><td class="st ok">動作確認済み</td><td><code>focus_mode.gd</code>(画面幅の 30%・右下・常に手前)</td></tr>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "neutral", fontFamily: "Hiragino Sans, Noto Sans JP, sans-serif" });
+  const done = new Set();
+  async function draw(id) {
+    if (done.has(id)) return;
+    done.add(id);
+    await mermaid.run({ nodes: document.querySelectorAll(`#${id} .mermaid`) });
+  }
+  document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", x === b));
+    document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === b.dataset.t));
+    draw(b.dataset.t);
+  }));
+  draw("all");
+</script>
+</body>
+</html>

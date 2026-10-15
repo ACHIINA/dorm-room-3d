@@ -1,0 +1,16 @@
+# Godot が自動で作るキャッシュ
+godot_walk/.godot/
+
+# 重いファイルは GitHub Releases の zip に入れる(README を参照)
+godot_walk/assets/room.glb
+godot_walk/assets/sky/
+*.blend
+*.blend1
+assets_polyhaven/
+
+# 書き出しや取り込みで毎回作り直されるもの
+godot_walk/assets/textures/
+godot_walk/assets/room_*
+
+# macOS
+.DS_Store

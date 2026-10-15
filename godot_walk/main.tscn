@@ -1,0 +1,167 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/room.glb" id="1_room"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/room_setup.gd" id="3_setup"]
+[ext_resource type="Texture2D" path="res://assets/sky/laufenurg_church_4k.hdr" id="4_sky"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_night"]
+panorama = ExtResource("4_sky")
+energy_multiplier = 0.6
+
+[sub_resource type="Sky" id="Sky_night"]
+sky_material = SubResource("PanoramaSkyMaterial_night")
+
+[sub_resource type="Environment" id="Environment_night"]
+background_mode = 2
+sky = SubResource("Sky_night")
+sky_rotation = Vector3(0, -1.0472, 0)
+ambient_light_source = 2
+ambient_light_color = Color(0.32, 0.27, 0.24, 1)
+ambient_light_energy = 0.2
+tonemap_mode = 4
+tonemap_exposure = 1.1
+ssao_enabled = true
+ssao_radius = 0.6
+ssao_intensity = 1.6
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_cascades = 2
+sdfgi_min_cell_size = 0.05
+sdfgi_energy = 1.6
+glow_enabled = true
+glow_intensity = 0.5
+glow_bloom = 0.04
+ssr_enabled = true
+ssr_max_steps = 48
+ssr_fade_in = 0.2
+ssr_depth_tolerance = 0.12
+ssil_enabled = true
+ssil_radius = 2.0
+ssil_intensity = 0.8
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.05
+volumetric_fog_albedo = Color(0.92, 0.9, 0.86, 1)
+volumetric_fog_anisotropy = 0.55
+volumetric_fog_length = 9.0
+volumetric_fog_detail_spread = 1.5
+volumetric_fog_ambient_inject = 0.0
+volumetric_fog_sky_affect = 0.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.22
+height = 1.6
+
+[node name="Main" type="Node3D"]
+script = ExtResource("3_setup")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_night")
+
+[node name="Room" parent="." instance=ExtResource("1_room")]
+
+[node name="DeskLamp" type="SpotLight3D" parent="."]
+transform = Transform3D(-0.50000, 0.68244, -0.53318, 0.00000, 0.61566, 0.78801, 0.86603, 0.39401, -0.30783, -2.34919, 1.30454, -3.46365)
+light_color = Color(1, 0.62, 0.32, 1)
+light_energy = 4.0
+shadow_enabled = true
+spot_range = 3.5
+spot_attenuation = 1.2
+spot_angle = 48.0
+spot_angle_attenuation = 1.6
+light_volumetric_fog_energy = 5.0
+
+[node name="DeskLampGlow" type="OmniLight3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -2.34919, 1.30454, -3.46365)
+light_color = Color(1, 0.62, 0.32, 1)
+light_energy = 0.35
+omni_range = 1.4
+light_volumetric_fog_energy = 0.5
+
+[node name="GlobeLamp" type="OmniLight3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -2.30000, 0.95500, -4.79000)
+light_color = Color(1, 0.66, 0.36, 1)
+light_energy = 0.9
+shadow_enabled = true
+omni_range = 2.4
+omni_attenuation = 1.8
+light_volumetric_fog_energy = 1.5
+
+[node name="MonitorLight" type="SpotLight3D" parent="."]
+transform = Transform3D(-0.15643, -0.00000, -0.98769, 0.00000, 1.00000, -0.00000, 0.98769, -0.00000, -0.15643, -2.48481, 1.16000, -2.62968)
+light_color = Color(0.75, 0.82, 0.95, 1)
+light_energy = 0.8
+spot_range = 2.2
+spot_angle = 70.0
+light_volumetric_fog_energy = 0.6
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.95783, -0.17198, 0.23020, 0.00000, 0.80111, 0.59851, -0.28735, 0.57327, -0.76733, 0.00000, 4.00000, -6.00000)
+light_color = Color(0.58, 0.7, 1, 1)
+light_energy = 0.55
+shadow_enabled = true
+directional_shadow_max_distance = 15.0
+light_volumetric_fog_energy = 12.0
+
+[node name="WindowSky" type="SpotLight3D" parent="."]
+transform = Transform3D(-1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -0.00000, 0.00000, -0.00000, -1.00000, 0.30000, 1.72000, -5.30000)
+light_color = Color(0.42, 0.52, 0.85, 1)
+light_energy = 0.7
+spot_range = 6.0
+spot_angle = 80.0
+light_volumetric_fog_energy = 0.4
+
+[node name="WarmBounce" type="OmniLight3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -0.90000, 2.22000, -1.60000)
+light_color = Color(1, 0.7, 0.45, 1)
+light_energy = 0.4
+omni_range = 5.0
+light_volumetric_fog_energy = 0.0
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(0.93042, 0.00000, 0.36650, 0.00000, 1.00000, 0.00000, -0.36650, 0.00000, 0.93042, 0.00000, 0.00000, -0.75000)
+script = ExtResource("2_player")
+
+[node name="Collision" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="Head" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Player/Head"]
+fov = 68.0
+near = 0.03
+
+[node name="RecordPlayer" type="AudioStreamPlayer3D" parent="."]
+unit_size = 2.5
+max_distance = 14.0
+volume_db = -3.0
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Help" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 1100.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.75)
+text = "WASD: 移動 / Shift: 速く歩く / Space: ジャンプ / E: 調べる・使う / F: 集中モード / T: 昼と夜 / Tab: 今日のこと / P: 写真 / Esc: カーソル解除"
+
+[node name="Prompt" type="Label" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -90.0
+offset_right = 200.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
